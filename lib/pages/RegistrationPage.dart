@@ -1,3 +1,4 @@
+import 'package:cleanloop/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 
 class Registrationpage extends StatefulWidget {
@@ -292,7 +293,10 @@ class _RegistrationpageState extends State<Registrationpage> {
                       fontSize: 14, fontWeight: FontWeight.w500),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>Loginpage()));
+                  },
                   child: const Text(
                     "Login",
                     style: TextStyle(

@@ -1,5 +1,7 @@
 import 'package:cleanloop/pages/LoginPage.dart';
+import 'package:cleanloop/pages/OnboardingPage.dart';
 import 'package:cleanloop/pages/RegistrationPage.dart';
+import 'package:cleanloop/pages/SplasScreen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Loginpage(),
+      home: Splashscreen(),
     );
   }
 }
