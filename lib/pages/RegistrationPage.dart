@@ -1,14 +1,13 @@
-import 'package:cleanloop/pages/RegistrationPage.dart';
 import 'package:flutter/material.dart';
 
-class Loginpage extends StatefulWidget {
-  const Loginpage({super.key});
+class Registrationpage extends StatefulWidget {
+  const Registrationpage({super.key});
 
   @override
-  State<Loginpage> createState() => _LoginpageState();
+  State<Registrationpage> createState() => _RegistrationpageState();
 }
 
-class _LoginpageState extends State<Loginpage> {
+class _RegistrationpageState extends State<Registrationpage> {
   bool _isPasswordVisible = false;
 
   @override
@@ -18,6 +17,21 @@ class _LoginpageState extends State<Loginpage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+
+      extendBodyBehindAppBar: true,
+      // Add this - Custom AppBar with transparent background
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black, size: 40,),
+          onPressed: () {
+            // Navigate back to login page
+            Navigator.pop(context);
+          },
+        ),
+      ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -27,12 +41,93 @@ class _LoginpageState extends State<Loginpage> {
               width: screenWidth,
               fit: BoxFit.cover,
             ),
-            SizedBox(height: screenHeight * 0.02),
-            Image.asset(
-              "lib/assets/images/Loginpage.icon.png",
-              width: screenWidth * 0.75,
+            Text("Sign Up", style: TextStyle(
+              fontSize: 33,
+              fontWeight: FontWeight.bold
+            ),),
+            Text ("Create Your Account", style: TextStyle(
+              color: Colors.black54,
+              fontSize: 17,
+              fontWeight: FontWeight.w500
+            ),),
+            SizedBox(height: screenHeight * 0.05),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+              child: TextField(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0x33F5F5F5),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.person, size: 30),
+                        SizedBox(
+                          height: 32,
+                          child: VerticalDivider(
+                            color: Colors.black54,
+                            thickness: 1.5,
+                            width: 15,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  labelText: "Enter your name",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                    const BorderSide(color: Colors.grey, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                    const BorderSide(color: Colors.black, width: 1.5),
+                  ),
+                ),
+              ),
             ),
-            SizedBox(height: screenHeight * 0.029),
+            SizedBox(height: screenHeight * 0.02),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+              child: TextField(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0x33F5F5F5),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.phone_android_rounded, size: 30),
+                        SizedBox(
+                          height: 32,
+                          child: VerticalDivider(
+                            color: Colors.black54,
+                            thickness: 1.5,
+                            width: 15,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  labelText: "Enter your phone number",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                    const BorderSide(color: Colors.grey, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                    const BorderSide(color: Colors.black, width: 1.5),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: screenHeight * 0.02),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
@@ -56,7 +151,7 @@ class _LoginpageState extends State<Loginpage> {
                       ],
                     ),
                   ),
-                  labelText: "Email",
+                  labelText: "Enter your email",
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
@@ -70,6 +165,7 @@ class _LoginpageState extends State<Loginpage> {
                 ),
               ),
             ),
+
             SizedBox(height: screenHeight * 0.02),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
@@ -86,9 +182,9 @@ class _LoginpageState extends State<Loginpage> {
 
                       }, icon: Icon(
 
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off
 
-                      )),
+                  )),
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(left: 10, right: 10),
                     child: Row(
@@ -120,24 +216,7 @@ class _LoginpageState extends State<Loginpage> {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(right: screenWidth * 0.1),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    "Forgot your Password?",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: screenHeight * 0.02),
+            SizedBox(height: screenHeight * 0.05),
             Container(
               height: screenHeight * 0.07,
               width: screenWidth * 0.6,
@@ -147,7 +226,7 @@ class _LoginpageState extends State<Loginpage> {
               ),
               child: const Center(
                 child: Text(
-                  "Login",
+                  "Sign Up",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -207,17 +286,15 @@ class _LoginpageState extends State<Loginpage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Don’t have an account yet?  ",
+                  "Already have an account ?  ",
                   style: TextStyle(
-                    color: Colors.black54,
+                      color: Colors.black54,
                       fontSize: 14, fontWeight: FontWeight.w500),
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>Registrationpage()));
-                  },
+                  onTap: () {},
                   child: const Text(
-                    "Sign Up",
+                    "Login",
                     style: TextStyle(
                         color: Colors.blue,
                         fontSize: 16,
