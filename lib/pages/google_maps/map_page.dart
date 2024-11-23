@@ -58,42 +58,51 @@ class _MapPageState extends State<MapPage> {
     CameraPosition _newPosition = CameraPosition(target: pos , zoom: 13, );
     await controller.animateCamera(CameraUpdate.newCameraPosition(_newPosition),);
   }
-  Future<void> getLocationUpdates() async{
+  Future<void> getLocationUpdates() async {
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
     _serviceEnabled = await _locationController.serviceEnabled();
-    if (!_serviceEnabled) {  // Fix: Change from `if (_serviceEnabled)` to `if (!_serviceEnabled)`
+    print("Service Enabled: $_serviceEnabled");
+
+    if (!_serviceEnabled) {
       _serviceEnabled = await _locationController.requestService();
+      print("Requested Service: $_serviceEnabled");
       if (!_serviceEnabled) {
-        return; // Exit if the service is not enabled after requesting
+        print("Service not enabled");
+        return;
       }
     }
 
     _permissionGranted = await _locationController.hasPermission();
-    if(_permissionGranted == PermissionStatus.denied){
+    print("Permission Granted: $_permissionGranted");
+
+    if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await _locationController.requestPermission();
-      if(_permissionGranted != PermissionStatus.granted){
+      if (_permissionGranted != PermissionStatus.granted) {
+        print("Permission not granted");
         return;
       }
     }
-    _locationController.onLocationChanged.listen((LocationData currentLocation){
-      if(currentLocation.latitude != null &&
-      currentLocation.longitude != null) {
+
+    print("Starting location updates...");
+    _locationController.onLocationChanged.listen((LocationData currentLocation) {
+      print("Location: ${currentLocation.latitude}, ${currentLocation.longitude}");
+      if (currentLocation.latitude != null && currentLocation.longitude != null) {
         setState(() {
           _currentPosition = LatLng(currentLocation.latitude!, currentLocation.longitude!);
           _cameraToPosition(_currentPosition!);
-
         });
       }
     });
   }
-  Future<void> drawRoutePolyline() async {
-    PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      GOOGLE_MAPS_API_KEY, // Replace with your actual API key
-      PointLatLng(_pGooglePlex.latitude, _pGooglePlex.longitude),
-      PointLatLng(_kGooglePlex.latitude, _kGooglePlex.longitude),
-      travelMode: TravelMode.driving, request: null,
-    );
+
+// Future<void> drawRoutePolyline() async {
+  //   PolylinePoints polylinePoints = PolylinePoints();
+  //   PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+  //     GOOGLE_MAPS_API_KEY, // Replace with your actual API key
+  //     PointLatLng(_pGooglePlex.latitude, _pGooglePlex.longitude),
+  //     PointLatLng(_kGooglePlex.latitude, _kGooglePlex.longitude),
+  //     travelMode: TravelMode.driving, request: null,
+  //   );
 }
