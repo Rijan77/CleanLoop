@@ -7,13 +7,11 @@ class AuthService{
   String password) async{
     try {
       final credential= await _auth.createUserWithEmailAndPassword(email: email, password: password);
-
       return credential.user;
     } catch (e){
-      print("Something went wrong");
+      print("Error: $e");
+      return null;
     }
-    return null;
-
   }
 
   Future<User?> loginUserWithEmailAndPassword(String email,
@@ -23,9 +21,9 @@ class AuthService{
 
       return credential.user;
     } catch (e){
-      print("Something went wrong");
+      print("Error $e");
+      return null;
     }
-    return null;
   }
 
   Future<void> signout() async{

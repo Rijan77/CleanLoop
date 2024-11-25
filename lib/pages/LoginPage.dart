@@ -1,6 +1,9 @@
+import 'package:cleanloop/pages/OnboardingPage.dart';
 import 'package:cleanloop/pages/RegistrationPage.dart';
+import 'package:cleanloop/pages/auth_service.dart';
 import 'package:flutter/material.dart';
 
+import 'CustomDialog.dart';
 import 'Forgot_Password.dart';
 
 class Loginpage extends StatefulWidget {
@@ -11,10 +14,15 @@ class Loginpage extends StatefulWidget {
 }
 
 class _LoginpageState extends State<Loginpage> {
+
+  final _auth = AuthService();
+
   bool _isPasswordVisible = false;
 
  final _email = TextEditingController();
  final _password = TextEditingController();
+
+
 
  @override
  void dispose(){
@@ -155,21 +163,24 @@ class _LoginpageState extends State<Loginpage> {
               ),
             ),
             SizedBox(height: screenHeight * 0.02),
-            Container(
-              height: screenHeight * 0.068,
-              width: screenWidth * 0.6,
-              decoration: BoxDecoration(
-                color: Colors.green.shade500,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Center(
-                child: Text(
-                  "Login",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "calistoga",
-                    letterSpacing: 2,
+            InkWell(
+              onTap: _login,
+              child: Container(
+                height: screenHeight * 0.068,
+                width: screenWidth * 0.6,
+                decoration: BoxDecoration(
+                  color: Colors.green.shade500,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Login",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: "calistoga",
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
               ),
@@ -249,5 +260,62 @@ class _LoginpageState extends State<Loginpage> {
         ),
       ),
     );
+
   }
+  _login() async {
+    if (_email.text.isEmpty || _password.text.isEmpty) {
+      CustomDialog.showSnackBar(
+        context: context,
+        message: "Email and Password cannot be empty.",
+      );
+      return;
+    }
+
+    if (!_email.text.contains("@gmail.com")) {
+      CustomDialog.showSnackBar(
+        context: context,
+        message: "Please enter a valid email address.",
+      );
+      return;
+    }
+
+    try {
+      // Attempt to log in the user
+      final user = await _auth.loginUserWithEmailAndPassword(
+        _email.text,
+        _password.text,
+      );
+
+      if (user != null) {
+        CustomDialog.showSuccessDialog(
+          context: context,
+          title: "Welcome Back!",
+          message: "You have successfully logged in.",
+          onConfirm: () {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Onboardingpage()));
+
+          }
+        );
+
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=> const Onboardingpage()));
+        });
+
+      } else {
+        CustomDialog.showSnackBar(
+          context: context,
+          message: "Login failed. Please check your credentials and try again.",
+        );
+      }
+    } catch (e) {
+      // Handle errors (e.g., network issues, server errors)
+      CustomDialog.showSnackBar(
+        context: context,
+        message: "An error occurred: ${e.toString()}",
+      );
+    }
+  }
+
+
 }
+

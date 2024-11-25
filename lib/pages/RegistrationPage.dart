@@ -1,5 +1,10 @@
 import 'package:cleanloop/pages/LoginPage.dart';
+import 'package:cleanloop/pages/OnboardingPage.dart';
+import 'package:cleanloop/pages/auth_service.dart';
 import 'package:flutter/material.dart';
+
+import 'CustomDialog.dart';
+
 
 class Registrationpage extends StatefulWidget {
   const Registrationpage({super.key});
@@ -15,6 +20,8 @@ class _RegistrationpageState extends State<Registrationpage> {
   final _number = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+
+  final _auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -227,19 +234,22 @@ class _RegistrationpageState extends State<Registrationpage> {
               ),
             ),
             SizedBox(height: screenHeight * 0.05),
-            Container(
-              height: screenHeight * 0.07,
-              width: screenWidth * 0.6,
-              decoration: BoxDecoration(
-                color: Colors.green.shade500,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Center(
-                child: Text(
-                  "Sign Up",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+            InkWell(
+              onTap: _signup,
+              child: Container(
+                height: screenHeight * 0.07,
+                width: screenWidth * 0.6,
+                decoration: BoxDecoration(
+                  color: Colors.green.shade500,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Sign Up",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -320,5 +330,38 @@ class _RegistrationpageState extends State<Registrationpage> {
         ),
       ),
     );
+    }
+  _signup() async{
+
+    if (_email.text.isEmpty || _password.text.isEmpty){
+      CustomDialog.showSnackBar(context: context, message: "Email and Password cannot be empty");
+      return;
+    }
+
+    if (!_email.text.contains("@gmail.com")){
+      CustomDialog.showSnackBar(context: context, message: "Please enter a valid email address.");
+      return;
+    }
+
+    if(_password.text.length<6){
+      CustomDialog.showSnackBar(context: context, message: "Password must be at least 6 characters.");
+      return;
+    }
+    final user = await _auth.createUserWithEmailAndPassword(_email.text, _password.text);
+    if(user != null){
+      CustomDialog.showSuccessDialog(
+          context: context,
+          title: "Success",
+          message: "Welcome to the Cleanloop!",
+        onConfirm: (){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Onboardingpage()));
+        }
+
+      );
+      Future.delayed(const Duration(seconds: 3), () {
+        Navigator.push(context, MaterialPageRoute(builder: (context)=> const Onboardingpage()));
+      });
+
+    }
   }
 }
