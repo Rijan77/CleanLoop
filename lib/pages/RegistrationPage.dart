@@ -11,6 +11,11 @@ class Registrationpage extends StatefulWidget {
 class _RegistrationpageState extends State<Registrationpage> {
   bool _isPasswordVisible = false;
 
+  final _name = TextEditingController();
+  final _number = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     // Get screen width and height using MediaQuery
@@ -55,6 +60,7 @@ class _RegistrationpageState extends State<Registrationpage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
+                controller: _name,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0x33F5F5F5),
@@ -93,6 +99,7 @@ class _RegistrationpageState extends State<Registrationpage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
+                controller: _number,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0x33F5F5F5),
@@ -132,6 +139,7 @@ class _RegistrationpageState extends State<Registrationpage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
+                controller: _email,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0x33F5F5F5),
@@ -171,6 +179,7 @@ class _RegistrationpageState extends State<Registrationpage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
+                controller: _password,
                 obscureText:  !_isPasswordVisible,
                 decoration: InputDecoration(
                   filled: true,

@@ -13,6 +13,16 @@ class Loginpage extends StatefulWidget {
 class _LoginpageState extends State<Loginpage> {
   bool _isPasswordVisible = false;
 
+ final _email = TextEditingController();
+ final _password = TextEditingController();
+
+ @override
+ void dispose(){
+   super.dispose();
+   _email.dispose();
+   _password.dispose();
+ }
+
   @override
   Widget build(BuildContext context) {
     // Get screen width and height using MediaQuery
@@ -38,6 +48,7 @@ class _LoginpageState extends State<Loginpage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
+                controller: _email,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0x33F5F5F5),
@@ -59,6 +70,7 @@ class _LoginpageState extends State<Loginpage> {
                     ),
                   ),
                   labelText: "Email",
+
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
@@ -76,6 +88,7 @@ class _LoginpageState extends State<Loginpage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
+                controller: _password,
                 obscureText:  !_isPasswordVisible,
                 decoration: InputDecoration(
                   filled: true,
