@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // home: WasteCleaningHomePage(),
-      home: SchedulePickupPage(),
+      home: WasteCleaningHomePage(),
     );
   }
 }
