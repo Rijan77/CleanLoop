@@ -1,6 +1,8 @@
 import 'package:cleanloop/pages/RegistrationPage.dart';
 import 'package:flutter/material.dart';
 
+import 'Forgot_Password.dart';
+
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
 
@@ -125,7 +127,9 @@ class _LoginpageState extends State<Loginpage> {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const ForgotPassword())); 
+                  },
                   child: const Text(
                     "Forgot your Password?",
                     style: TextStyle(
@@ -139,7 +143,7 @@ class _LoginpageState extends State<Loginpage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             Container(
-              height: screenHeight * 0.07,
+              height: screenHeight * 0.068,
               width: screenWidth * 0.6,
               decoration: BoxDecoration(
                 color: Colors.green.shade500,
@@ -149,8 +153,10 @@ class _LoginpageState extends State<Loginpage> {
                 child: Text(
                   "Login",
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    fontFamily: "calistoga",
+                    letterSpacing: 2,
                   ),
                 ),
               ),
@@ -214,7 +220,7 @@ class _LoginpageState extends State<Loginpage> {
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>Registrationpage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const Registrationpage()));
                   },
                   child: const Text(
                     "Sign Up",

@@ -20,7 +20,7 @@ class _RegistrationpageState extends State<Registrationpage> {
     return Scaffold(
 
       extendBodyBehindAppBar: true,
-      // Add this - Custom AppBar with transparent background
+      // Add this - Custom AppBar with transparent background-
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -42,11 +42,11 @@ class _RegistrationpageState extends State<Registrationpage> {
               width: screenWidth,
               fit: BoxFit.cover,
             ),
-            Text("Sign Up", style: TextStyle(
+            const Text("Sign Up", style: TextStyle(
               fontSize: 33,
               fontWeight: FontWeight.bold
             ),),
-            Text ("Create Your Account", style: TextStyle(
+            const Text ("Create Your Account", style: TextStyle(
               color: Colors.black54,
               fontSize: 17,
               fontWeight: FontWeight.w500
@@ -295,7 +295,7 @@ class _RegistrationpageState extends State<Registrationpage> {
                 InkWell(
                   onTap: () {
 
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>Loginpage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const Loginpage()));
                   },
                   child: const Text(
                     "Login",
