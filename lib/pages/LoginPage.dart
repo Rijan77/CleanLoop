@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import 'package:cleanloop/pages/OnboardingPage.dart';
 import 'package:cleanloop/pages/RegistrationPage.dart';
 import 'package:cleanloop/pages/auth_service.dart';
@@ -20,23 +19,28 @@ class _LoginpageState extends State<Loginpage> {
 
   bool _isPasswordVisible = false;
 
- final _email = TextEditingController();
- final _password = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
 
 
-
- @override
- void dispose(){
-   super.dispose();
-   _email.dispose();
-   _password.dispose();
- }
+  @override
+  void dispose() {
+    super.dispose();
+    _email.dispose();
+    _password.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Get screen width and height using MediaQuery
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -98,7 +102,7 @@ class _LoginpageState extends State<Loginpage> {
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
                 controller: _password,
-                obscureText:  !_isPasswordVisible,
+                obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0x33F5F5F5),
@@ -107,12 +111,12 @@ class _LoginpageState extends State<Loginpage> {
                         setState(() {
                           _isPasswordVisible = !_isPasswordVisible;
                         });
-
                       }, icon: Icon(
 
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off
+                      _isPasswordVisible ? Icons.visibility : Icons
+                          .visibility_off
 
-                      )),
+                  )),
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(left: 10, right: 10),
                     child: Row(
@@ -150,7 +154,8 @@ class _LoginpageState extends State<Loginpage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const ForgotPassword())); 
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => const ForgotPassword()));
                   },
                   child: const Text(
                     "Forgot your Password?",
@@ -240,12 +245,13 @@ class _LoginpageState extends State<Loginpage> {
                 const Text(
                   "Don’t have an account yet?  ",
                   style: TextStyle(
-                    color: Colors.black54,
+                      color: Colors.black54,
                       fontSize: 14, fontWeight: FontWeight.w500),
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const Registrationpage()));
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => const Registrationpage()));
                   },
                   child: const Text(
                     "Sign Up",
@@ -261,8 +267,8 @@ class _LoginpageState extends State<Loginpage> {
         ),
       ),
     );
-
   }
+
   _login() async {
     if (_email.text.isEmpty || _password.text.isEmpty) {
       CustomDialog.showSnackBar(
@@ -289,19 +295,19 @@ class _LoginpageState extends State<Loginpage> {
 
       if (user != null) {
         CustomDialog.showSuccessDialog(
-          context: context,
-          title: "Welcome Back!",
-          message: "You have successfully logged in.",
-          onConfirm: () {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Onboardingpage()));
-
-          }
+            context: context,
+            title: "Welcome Back!",
+            message: "You have successfully logged in.",
+            onConfirm: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(
+                  builder: (context) => const Onboardingpage()));
+            }
         );
 
         Future.delayed(const Duration(seconds: 2), () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> const Onboardingpage()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const Onboardingpage()));
         });
-
       } else {
         CustomDialog.showSnackBar(
           context: context,
@@ -316,10 +322,4 @@ class _LoginpageState extends State<Loginpage> {
       );
     }
   }
-
-
 }
-
-=======
-
->>>>>>> feature-UI-design
