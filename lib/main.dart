@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 import 'package:cleanloop/pages/SplasScreen.dart';
+=======
+
+import 'package:cleanloop/pages/greenMarket.dart';
+import 'package:cleanloop/pages/homePage.dart';
+import 'package:cleanloop/pages/schedulePickUp.dart';
+>>>>>>> feature-UI-design
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -22,7 +29,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+<<<<<<< HEAD
       home: const Splashscreen(),
+=======
+      // home: WasteCleaningHomePage(),
+      home: WasteCleaningHomePage(),
+>>>>>>> feature-UI-design
     );
   }
 }
+

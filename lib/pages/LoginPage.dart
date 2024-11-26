@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import 'package:cleanloop/pages/OnboardingPage.dart';
 import 'package:cleanloop/pages/RegistrationPage.dart';
 import 'package:cleanloop/pages/auth_service.dart';
@@ -319,3 +320,6 @@ class _LoginpageState extends State<Loginpage> {
 
 }
 
+=======
+
+>>>>>>> feature-UI-design
