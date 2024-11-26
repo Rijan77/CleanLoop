@@ -3,6 +3,7 @@ import 'package:cleanloop/pages/OnboardingPage.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
+  // hello
 
   @override
   State<Splashscreen> createState() => _SplasscreenState();
