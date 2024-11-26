@@ -1,4 +1,7 @@
-import 'package:cleanloop/pages/LoginPage.dart';
+
+import 'package:cleanloop/pages/greenMarket.dart';
+import 'package:cleanloop/pages/homePage.dart';
+import 'package:cleanloop/pages/schedulePickUp.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,7 +20,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Loginpage(),
+      // home: WasteCleaningHomePage(),
+      home: WasteCleaningHomePage(),
     );
   }
 }
+
