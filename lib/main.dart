@@ -1,5 +1,3 @@
-import 'package:cleanloop/pages/LoginPage.dart';
-import 'package:cleanloop/pages/google_maps/geo_location.dart';
 import 'package:cleanloop/pages/google_maps/map_page.dart';
 import 'package:flutter/material.dart';
 
