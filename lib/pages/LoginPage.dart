@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'CustomDialog.dart';
 import 'Forgot_Password.dart';
+import 'homePage.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -300,13 +301,13 @@ class _LoginpageState extends State<Loginpage> {
             message: "You have successfully logged in.",
             onConfirm: () {
               Navigator.pushReplacement(context, MaterialPageRoute(
-                  builder: (context) => const Onboardingpage()));
+                  builder: (context) =>  WasteCleaningHomePage()));
             }
         );
 
         Future.delayed(const Duration(seconds: 2), () {
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const Onboardingpage()));
+              MaterialPageRoute(builder: (context) =>  WasteCleaningHomePage()));
         });
       } else {
         CustomDialog.showSnackBar(

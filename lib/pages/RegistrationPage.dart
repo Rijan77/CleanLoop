@@ -354,12 +354,12 @@ class _RegistrationpageState extends State<Registrationpage> {
           title: "Success",
           message: "Welcome to the Cleanloop!",
         onConfirm: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Onboardingpage()));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> Loginpage()));
         }
 
       );
       Future.delayed(const Duration(seconds: 3), () {
-        Navigator.push(context, MaterialPageRoute(builder: (context)=> const Onboardingpage()));
+        Navigator.push(context, MaterialPageRoute(builder: (context)=> const Loginpage()));
       });
 
     }
