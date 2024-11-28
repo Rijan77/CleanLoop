@@ -222,7 +222,9 @@ class _LoginpageState extends State<Loginpage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 InkWell(
-                  onTap: () {},
+                  onTap: () async {
+                    await _auth.loginWithGoogle();
+                  },
                   child: SizedBox(
                     height: screenWidth * 0.14,
                     width: screenWidth * 0.14,
@@ -305,7 +307,7 @@ class _LoginpageState extends State<Loginpage> {
             }
         );
 
-        Future.delayed(const Duration(seconds: 2), () {
+        await Future.delayed(const Duration(seconds: 2), () {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) =>  WasteCleaningHomePage()));
         });
