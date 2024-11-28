@@ -1,3 +1,4 @@
+import 'package:cleanloop/pages/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:cleanloop/pages/OnboardingPage.dart';
 
@@ -36,7 +37,7 @@ class _SplasscreenState extends State<Splashscreen> with SingleTickerProviderSta
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const Onboardingpage(),
+            pageBuilder: (context, animation, secondaryAnimation) => Wrapper(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: animation,

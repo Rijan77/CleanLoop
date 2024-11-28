@@ -1,6 +1,7 @@
 import 'package:cleanloop/pages/SplasScreen.dart';
 import 'package:cleanloop/pages/homePage.dart';
 import 'package:cleanloop/pages/userProfile.dart';
+import 'package:cleanloop/pages/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:    Userprofile(),
+      home:    Splashscreen(),
     );
   }
 }
