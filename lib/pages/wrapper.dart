@@ -23,7 +23,7 @@ class _WrapperState extends State<Wrapper> {
           return Center(child: CircularProgressIndicator(),);
         } else if(snapshot.hasError){
           return Center(
-            child: Text("Error"),
+            child: Text("Error: ${snapshot.error}"),
           );
         }else {
           if(snapshot.data == null){
