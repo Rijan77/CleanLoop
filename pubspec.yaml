@@ -28,11 +28,11 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  google_maps_flutter: ^2.10.0
-  flutter_polyline_points: ^2.1.0
-  location: ^7.0.1
-  geocoding: ^3.0.0
-  flutter_local_notifications: ^18.0.1
+  google_maps_flutter:
+  flutter_polyline_points:
+  location:
+  geocoding:
+  flutter_local_notifications:
   flutter:
     sdk: flutter
 
