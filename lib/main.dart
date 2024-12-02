@@ -1,5 +1,7 @@
 import 'package:cleanloop/pages/SplasScreen.dart';
 import 'package:cleanloop/pages/homePage.dart';
+import 'package:cleanloop/pages/tracking_location/location_confirmation.dart';
+import 'package:cleanloop/pages/tracking_location/map_page.dart';
 import 'package:cleanloop/pages/userProfile.dart';
 import 'package:cleanloop/pages/wrapper.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:    Splashscreen(),
+      home:    MapPage (),
     );
   }
 }
