@@ -2,6 +2,8 @@ import 'package:cleanloop/pages/LoginPage.dart';
 import 'package:cleanloop/pages/OnboardingPage.dart';
 import 'package:cleanloop/pages/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 import 'CustomDialog.dart';
 
@@ -26,8 +28,14 @@ class _RegistrationpageState extends State<Registrationpage> {
   @override
   Widget build(BuildContext context) {
     // Get screen width and height using MediaQuery
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
 
     return Scaffold(
 
@@ -55,13 +63,13 @@ class _RegistrationpageState extends State<Registrationpage> {
               fit: BoxFit.cover,
             ),
             const Text("Sign Up", style: TextStyle(
-              fontSize: 33,
-              fontWeight: FontWeight.bold
+                fontSize: 33,
+                fontWeight: FontWeight.bold
             ),),
             const Text ("Create Your Account", style: TextStyle(
-              color: Colors.black54,
-              fontSize: 17,
-              fontWeight: FontWeight.w500
+                color: Colors.black54,
+                fontSize: 17,
+                fontWeight: FontWeight.w500
             ),),
             SizedBox(height: screenHeight * 0.05),
             Padding(
@@ -187,7 +195,7 @@ class _RegistrationpageState extends State<Registrationpage> {
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
               child: TextField(
                 controller: _password,
-                obscureText:  !_isPasswordVisible,
+                obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0x33F5F5F5),
@@ -196,10 +204,10 @@ class _RegistrationpageState extends State<Registrationpage> {
                         setState(() {
                           _isPasswordVisible = !_isPasswordVisible;
                         });
-
                       }, icon: Icon(
 
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off
+                      _isPasswordVisible ? Icons.visibility : Icons
+                          .visibility_off
 
                   )),
                   prefixIcon: const Padding(
@@ -313,8 +321,8 @@ class _RegistrationpageState extends State<Registrationpage> {
                 ),
                 InkWell(
                   onTap: () {
-
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const Loginpage()));
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => const Loginpage()));
                   },
                   child: const Text(
                     "Login",
@@ -330,38 +338,54 @@ class _RegistrationpageState extends State<Registrationpage> {
         ),
       ),
     );
-    }
-  _signup() async{
+  }
 
-    if (_email.text.isEmpty || _password.text.isEmpty){
-      CustomDialog.showSnackBar(context: context, message: "Email and Password cannot be empty");
+  _signup() async {
+    if (_email.text.isEmpty || _password.text.isEmpty) {
+      CustomDialog.showSnackBar(
+          context: context, message: "Email and Password cannot be empty");
       return;
     }
 
-    if (!_email.text.contains("@gmail.com")){
-      CustomDialog.showSnackBar(context: context, message: "Please enter a valid email address.");
+    if (!_email.text.contains("@gmail.com")) {
+      CustomDialog.showSnackBar(
+          context: context, message: "Please enter a valid email address.");
       return;
     }
 
-    if(_password.text.length<6){
-      CustomDialog.showSnackBar(context: context, message: "Password must be at least 6 characters.");
+    if (_password.text.length < 6) {
+      CustomDialog.showSnackBar(
+          context: context, message: "Password must be at least 6 characters.");
       return;
     }
-    final user = await _auth.createUserWithEmailAndPassword(_email.text, _password.text);
-    if(user != null){
-      CustomDialog.showSuccessDialog(
+
+    try {
+      final user = await _auth.createUserWithEmailAndPassword(
+          _email.text, _password.text);
+
+      if (user != null) {
+        // Send email verification link
+        await _auth.sendEmailVerificationLink();
+
+        CustomDialog.showSuccessDialog(
           context: context,
-          title: "Success",
-          message: "Welcome to the Cleanloop!",
-        onConfirm: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> Loginpage()));
-        }
-
-      );
-      Future.delayed(const Duration(seconds: 3), () {
-        Navigator.push(context, MaterialPageRoute(builder: (context)=> const Loginpage()));
-      });
-
+          title: "Verify Your Email",
+          message:
+          "A verification link has been sent to your email address. Please verify your email before logging in.",
+          onConfirm: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Loginpage()),
+            );
+          },
+        );
+      }
+    } on Exception catch (e) {
+      CustomDialog.showSnackBar(
+          context: context,
+          message: e.toString().replaceFirst('Exception: ', ''));
     }
   }
 }
+
+

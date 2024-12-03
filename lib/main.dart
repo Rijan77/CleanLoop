@@ -1,3 +1,4 @@
+import 'package:cleanloop/pages/Forgot_Password.dart';
 import 'package:cleanloop/pages/SplasScreen.dart';
 import 'package:cleanloop/pages/homePage.dart';
 import 'package:cleanloop/pages/tracking_location/location_confirmation.dart';
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:    MapPage (),
+      home:    ForgotPassword(),
     );
   }
 }

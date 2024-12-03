@@ -3,6 +3,7 @@ import 'package:cleanloop/pages/RegistrationPage.dart';
 import 'package:cleanloop/pages/auth_service.dart';
 import 'package:flutter/material.dart';
 
+
 import 'CustomDialog.dart';
 import 'Forgot_Password.dart';
 import 'homePage.dart';
@@ -273,6 +274,7 @@ class _LoginpageState extends State<Loginpage> {
   }
 
   _login() async {
+    // Validate input
     if (_email.text.isEmpty || _password.text.isEmpty) {
       CustomDialog.showSnackBar(
         context: context,
@@ -292,33 +294,43 @@ class _LoginpageState extends State<Loginpage> {
     try {
       // Attempt to log in the user
       final user = await _auth.loginUserWithEmailAndPassword(
-        _email.text,
-        _password.text,
+        _email.text.trim(),
+        _password.text.trim(),
       );
 
       if (user != null) {
-        CustomDialog.showSuccessDialog(
+        // Check if the email is verified
+        if (!user.emailVerified) {
+          // Inform the user and send a verification email
+          CustomDialog.showSnackBar(
             context: context,
-            title: "Welcome Back!",
-            message: "You have successfully logged in.",
-            onConfirm: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(
-                  builder: (context) =>  WasteCleaningHomePage()));
-            }
-        );
+            message: "Please verify your email. A new verification link has been sent to your email.",
+          );
+          await _auth.sendEmailVerificationLink();
+          return;
+        }
 
-        await Future.delayed(const Duration(seconds: 2), () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) =>  WasteCleaningHomePage()));
-        });
+        // If email is verified, proceed to the next screen
+        CustomDialog.showSuccessDialog(
+          context: context,
+          title: "Welcome Back!",
+          message: "You have successfully logged in.",
+          onConfirm: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => WasteCleaningHomePage()),
+            );
+          },
+        );
       } else {
+        // Handle login failure
         CustomDialog.showSnackBar(
           context: context,
           message: "Login failed. Please check your credentials and try again.",
         );
       }
     } catch (e) {
-      // Handle errors (e.g., network issues, server errors)
+      // Handle any errors
       CustomDialog.showSnackBar(
         context: context,
         message: "An error occurred: ${e.toString()}",
@@ -326,3 +338,4 @@ class _LoginpageState extends State<Loginpage> {
     }
   }
 }
+

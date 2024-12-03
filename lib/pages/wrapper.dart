@@ -29,7 +29,7 @@ class _WrapperState extends State<Wrapper> {
           if(snapshot.data == null){
             return Onboardingpage();
           } else{
-            return HomeScreen();
+            return Userprofile();
           }
         }
 
