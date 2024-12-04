@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -29,12 +30,16 @@ class _MapPageState extends State<MapPage> {
 
   bool _waitingAtUser = false;
 
+  // Notification setup
+  late FlutterLocalNotificationsPlugin _localNotifications;
+
   @override
   void initState() {
     super.initState();
     _truckPosition = _sourceLocation;
     getLocationUpdates();
     startTruckMovement();
+    initializeNotifications();
   }
 
   @override
@@ -42,6 +47,37 @@ class _MapPageState extends State<MapPage> {
     _truckMovementTimer?.cancel();
     super.dispose();
   }
+
+  Future<void> initializeNotifications() async {
+    _localNotifications = FlutterLocalNotificationsPlugin();
+
+    const AndroidInitializationSettings androidSettings =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initSettings =
+    InitializationSettings(android: androidSettings);
+
+    await _localNotifications.initialize(initSettings);
+  }
+
+  Future<void> sendNotification(String title, String body) async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'truck_notification_channel', // Channel ID
+      'Truck Notifications',       // Channel name
+      channelDescription: 'Notifications for truck arrival', // Channel description (named argument)
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+
+    await FlutterLocalNotificationsPlugin().show(
+      0,        // Notification ID
+      title,    // Notification title
+      body,     // Notification body
+      notificationDetails,
+    );
+  }
+
 
   Future<void> getLocationUpdates() async {
     bool serviceEnabled = await _locationController.serviceEnabled();
@@ -67,31 +103,46 @@ class _MapPageState extends State<MapPage> {
     _truckMovementTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_currentPosition == null) return;
 
-      // Move truck towards user first
-      if (_distanceToUser == null || _distanceToUser! > 0.01) {
-        // Calculate truck's next position towards the user
-        LatLng newTruckPosition = moveTowards(_truckPosition!, _currentPosition!, _truckSpeed / 3600);
-        setState(() {
-          _truckPosition = newTruckPosition;
-        });
-      }
-
-      // If truck reaches user location, move towards the destination
-      if (_distanceToUser != null && _distanceToUser! <= 0.01) {
+      setState(() {
         if (!_waitingAtUser) {
-          // Once at the user location, set the flag to start moving towards the destination
-          _waitingAtUser = true;
+          // Move truck towards user first
+          _distanceToUser = calculateDistance(
+            _truckPosition!.latitude,
+            _truckPosition!.longitude,
+            _currentPosition!.latitude,
+            _currentPosition!.longitude,
+          );
+
+          if (_distanceToUser! > 0.01) {
+            // If not close to the user, move closer
+            _truckPosition = moveTowards(_truckPosition!, _currentPosition!, _truckSpeed / 3600);
+          } else {
+            // Truck has reached the user
+            _waitingAtUser = true;
+            sendNotification('Truck Arrived', 'The truck has reached your location.');
+            Future.delayed(const Duration(seconds: 5), () {
+              _waitingAtUser = false;
+            });
+          }
+        } else {
+          // Move truck towards the destination after reaching the user
+          _distanceToDestination = calculateDistance(
+            _truckPosition!.latitude,
+            _truckPosition!.longitude,
+            _destinationLocation.latitude,
+            _destinationLocation.longitude,
+          );
+
+          if (_distanceToDestination! > 0.01) {
+            // If not close to the destination, move closer
+            _truckPosition = moveTowards(_truckPosition!, _destinationLocation, _truckSpeed / 3600);
+          } else {
+            // Truck has reached the destination
+            timer.cancel();
+          }
         }
 
-        // Move towards destination after reaching the user
-        LatLng newTruckPosition = moveTowards(_truckPosition!, _destinationLocation, _truckSpeed / 3600);
-        setState(() {
-          _truckPosition = newTruckPosition;
-        });
-      }
-
-      // Calculate distances to update the UI
-      setState(() {
+        // Update distances and arrival times for UI
         _distanceToUser = calculateDistance(
           _truckPosition!.latitude,
           _truckPosition!.longitude,
@@ -104,21 +155,17 @@ class _MapPageState extends State<MapPage> {
           _destinationLocation.latitude,
           _destinationLocation.longitude,
         );
+
         _arrivalTimeToUser = calculateArrivalTime(_distanceToUser!, _truckSpeed);
         _arrivalTimeToDestination = calculateArrivalTime(_distanceToDestination!, _truckSpeed);
 
         updatePolylines();
       });
-
-      // Stop the timer when the truck reaches the destination
-      if (_distanceToDestination != null && _distanceToDestination! <= 0.01) {
-        timer.cancel();
-      }
     });
   }
 
-
   LatLng moveTowards(LatLng current, LatLng target, double distance) {
+    // Function to move the truck
     final double lat1 = current.latitude * pi / 180;
     final double lon1 = current.longitude * pi / 180;
     final double lat2 = target.latitude * pi / 180;
