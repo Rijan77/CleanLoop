@@ -50,7 +50,7 @@ class _UserprofileState extends State<Userprofile> {
             fontSize: 20
           ),),
           Padding(
-            padding: const EdgeInsets.only(top: 500),
+            padding: const EdgeInsets.only(top: 400),
             child: InkWell(
               onTap: () async{
                await _auth.signout();
