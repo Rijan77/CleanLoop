@@ -190,9 +190,9 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const Text(
                   'Categories',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
                 Expanded(
                   child: GridView.builder(
                     itemCount: 6,
@@ -220,6 +220,14 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.only(right: 300),
+          child: Text("Tips", style: TextStyle(
+            fontSize: 23,
+            fontWeight: FontWeight.bold
+          ),),
+        ),
+
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cleanloop/pages/OnboardingPage.dart';
 import 'package:cleanloop/pages/RegistrationPage.dart';
 import 'package:cleanloop/pages/auth_service.dart';
+import 'package:cleanloop/pages/userProfile.dart';
 import 'package:flutter/material.dart';
 
 
@@ -318,7 +319,7 @@ class _LoginpageState extends State<Loginpage> {
           onConfirm: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => WasteCleaningHomePage()),
+              MaterialPageRoute(builder: (context) => Userprofile()),
             );
           },
         );
