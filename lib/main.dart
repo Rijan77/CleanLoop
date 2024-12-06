@@ -1,5 +1,7 @@
 import 'package:cleanloop/pages/SplasScreen.dart';
 import 'package:cleanloop/pages/homePage.dart';
+import 'package:cleanloop/pages/schedulePickUp.dart';
+import 'package:cleanloop/pages/tracking_location/history_tracking.dart';
 import 'package:cleanloop/pages/tracking_location/location_confirmation.dart';
 import 'package:cleanloop/pages/tracking_location/map_page.dart';
 import 'package:cleanloop/pages/userProfile.dart';
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MapPage(),
+      home: HistoryTrackingPage(),
     );
   }
 }

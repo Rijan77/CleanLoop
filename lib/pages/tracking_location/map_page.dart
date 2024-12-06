@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -13,29 +15,34 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final LatLng _sourceLocation = const LatLng(27.6557, 85.3491); // Initial truck location
-  final LatLng _destinationLocation = const LatLng(27.6588, 85.3247); // Destination location
-  LatLng? _currentPosition; // User location
-  LatLng? _truckPosition; // Truck's current position
+  final LatLng _sourceLocation = const LatLng(27.6557, 85.3491);
+  final LatLng _destinationLocation = const LatLng(27.6663, 85.3330);
+  LatLng? _currentPosition;
+  LatLng? _truckPosition;
 
   Timer? _truckMovementTimer;
-  double _truckSpeed = 40; // Truck speed in km/h
-  double? _distanceToUser;
-  double? _distanceToDestination;
-  String? _arrivalTimeToUser;
-  String? _arrivalTimeToDestination;
+  double _truckSpeed = 70; // Speed in km/h
+  bool _movingToUser = true;
 
   final Location _locationController = Location();
-  final Map<PolylineId, Polyline> _polylines = {}; // To hold the polylines
+  final Map<PolylineId, Polyline> _polylines = {};
 
-  bool _waitingAtUser = false;
-
-  // Notification setup
+  late FirebaseFirestore _firestore;
   late FlutterLocalNotificationsPlugin _localNotifications;
+
+  // Placeholder driver and arrival info
+  final String driverName = "Don Van Malai";
+  final String driverContact = "+9808888475";
+  final String vehicleNumber = "ABC-1977";
+  double? _distanceToUser;
+  String? _arrivalTimeToUser;
+  double? _distanceToDestination;
+  String? _arrivalTimeToDestination;
 
   @override
   void initState() {
     super.initState();
+    initializeFirebase();
     _truckPosition = _sourceLocation;
     getLocationUpdates();
     startTruckMovement();
@@ -48,40 +55,54 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 
+  Future<void> initializeFirebase() async {
+    try {
+      await Firebase.initializeApp();
+      _firestore = FirebaseFirestore.instance;
+      await saveTruckStage('Source', _sourceLocation);
+    } catch (e) {
+      debugPrint('Error initializing Firebase: $e');
+    }
+  }
+
   Future<void> initializeNotifications() async {
     _localNotifications = FlutterLocalNotificationsPlugin();
-
-    const AndroidInitializationSettings androidSettings =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initSettings =
-    InitializationSettings(android: androidSettings);
-
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidSettings);
     await _localNotifications.initialize(initSettings);
   }
 
   Future<void> sendNotification(String title, String body) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'truck_notification_channel', // Channel ID
-      'Truck Notifications',       // Channel name
-      channelDescription: 'Notifications for truck arrival', // Channel description (named argument)
+    const androidDetails = AndroidNotificationDetails(
+      'truck_channel', 'Truck Notifications',
+      channelDescription: 'Notifications for truck tracking',
       importance: Importance.high,
       priority: Priority.high,
     );
-
-    const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
-
-    await FlutterLocalNotificationsPlugin().show(
-      0,        // Notification ID
-      title,    // Notification title
-      body,     // Notification body
-      notificationDetails,
-    );
+    const notificationDetails = NotificationDetails(android: androidDetails);
+    await _localNotifications.show(0, title, body, notificationDetails);
   }
 
+  Future<void> saveTruckStage(String stage, LatLng location) async {
+    try {
+      await _firestore.collection('truck_history').doc(stage).set({
+        'stage': stage,
+        'location': {
+          'latitude': location.latitude,
+          'longitude': location.longitude,
+        },
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error saving stage: $e');
+    }
+  }
 
   Future<void> getLocationUpdates() async {
     bool serviceEnabled = await _locationController.serviceEnabled();
-    if (!serviceEnabled) serviceEnabled = await _locationController.requestService();
+    if (!serviceEnabled) {
+      serviceEnabled = await _locationController.requestService();
+    }
 
     PermissionStatus permissionGranted = await _locationController.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
@@ -89,7 +110,7 @@ class _MapPageState extends State<MapPage> {
       if (permissionGranted != PermissionStatus.granted) return;
     }
 
-    _locationController.onLocationChanged.listen((LocationData location) {
+    _locationController.onLocationChanged.listen((location) {
       if (location.latitude != null && location.longitude != null) {
         setState(() {
           _currentPosition = LatLng(location.latitude!, location.longitude!);
@@ -100,12 +121,11 @@ class _MapPageState extends State<MapPage> {
   }
 
   void startTruckMovement() {
-    _truckMovementTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _truckMovementTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (_currentPosition == null) return;
 
       setState(() {
-        if (!_waitingAtUser) {
-          // Move truck towards user first
+        if (_movingToUser) {
           _distanceToUser = calculateDistance(
             _truckPosition!.latitude,
             _truckPosition!.longitude,
@@ -114,18 +134,13 @@ class _MapPageState extends State<MapPage> {
           );
 
           if (_distanceToUser! > 0.01) {
-            // If not close to the user, move closer
             _truckPosition = moveTowards(_truckPosition!, _currentPosition!, _truckSpeed / 3600);
           } else {
-            // Truck has reached the user
-            _waitingAtUser = true;
+            _movingToUser = false;
             sendNotification('Truck Arrived', 'The truck has reached your location.');
-            Future.delayed(const Duration(seconds: 5), () {
-              _waitingAtUser = false;
-            });
+            saveTruckStage('User', _truckPosition!);
           }
         } else {
-          // Move truck towards the destination after reaching the user
           _distanceToDestination = calculateDistance(
             _truckPosition!.latitude,
             _truckPosition!.longitude,
@@ -134,61 +149,53 @@ class _MapPageState extends State<MapPage> {
           );
 
           if (_distanceToDestination! > 0.01) {
-            // If not close to the destination, move closer
             _truckPosition = moveTowards(_truckPosition!, _destinationLocation, _truckSpeed / 3600);
           } else {
-            // Truck has reached the destination
+            sendNotification('Truck Arrived', 'The truck has reached the destination.');
+            saveTruckStage('Destination', _destinationLocation);
             timer.cancel();
           }
         }
 
-        // Update distances and arrival times for UI
-        _distanceToUser = calculateDistance(
-          _truckPosition!.latitude,
-          _truckPosition!.longitude,
-          _currentPosition!.latitude,
-          _currentPosition!.longitude,
-        );
-        _distanceToDestination = calculateDistance(
-          _truckPosition!.latitude,
-          _truckPosition!.longitude,
-          _destinationLocation.latitude,
-          _destinationLocation.longitude,
-        );
-
-        _arrivalTimeToUser = calculateArrivalTime(_distanceToUser!, _truckSpeed);
-        _arrivalTimeToDestination = calculateArrivalTime(_distanceToDestination!, _truckSpeed);
-
+        updateArrivalTimes();
         updatePolylines();
       });
     });
   }
 
+  void updateArrivalTimes() {
+    if (_distanceToUser != null) {
+      _arrivalTimeToUser = "${(_distanceToUser! / _truckSpeed * 60).toStringAsFixed(0)} min";
+    }
+    if (_distanceToDestination != null) {
+      _arrivalTimeToDestination = "${(_distanceToDestination! / _truckSpeed * 60).toStringAsFixed(0)} min";
+    }
+  }
+
   LatLng moveTowards(LatLng current, LatLng target, double distance) {
-    // Function to move the truck
-    final double lat1 = current.latitude * pi / 180;
-    final double lon1 = current.longitude * pi / 180;
-    final double lat2 = target.latitude * pi / 180;
-    final double lon2 = target.longitude * pi / 180;
+    final lat1 = current.latitude * pi / 180;
+    final lon1 = current.longitude * pi / 180;
+    final lat2 = target.latitude * pi / 180;
+    final lon2 = target.longitude * pi / 180;
 
-    final double dLat = lat2 - lat1;
-    final double dLon = lon2 - lon1;
+    final dLat = lat2 - lat1;
+    final dLon = lon2 - lon1;
 
-    final double a = sin(dLat / 2) * sin(dLat / 2) +
+    final a = sin(dLat / 2) * sin(dLat / 2) +
         cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
-    final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    final double totalDistance = 6371 * c; // Distance in km
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final totalDistance = 6371 * c;
 
-    final double fraction = min(distance / totalDistance, 1.0);
+    final fraction = min(distance / totalDistance, 1.0);
 
-    final double newLat = lat1 + fraction * dLat;
-    final double newLon = lon1 + fraction * dLon;
+    final newLat = lat1 + fraction * dLat;
+    final newLon = lon1 + fraction * dLon;
 
     return LatLng(newLat * 180 / pi, newLon * 180 / pi);
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const R = 6371; // Radius of Earth in km
+    const R = 6371;
     final dLat = (lat2 - lat1) * pi / 180;
     final dLon = (lon2 - lon1) * pi / 180;
 
@@ -196,33 +203,24 @@ class _MapPageState extends State<MapPage> {
         cos(lat1 * pi / 180) * cos(lat2 * pi / 180) * sin(dLon / 2) * sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
 
-    return R * c; // Distance in km
-  }
-
-  String calculateArrivalTime(double distance, double speed) {
-    final timeInHours = distance / speed;
-    final timeInMinutes = (timeInHours * 60).toInt();
-    return "$timeInMinutes min";
+    return R * c;
   }
 
   void updatePolylines() {
     _polylines.clear();
-
     if (_truckPosition != null && _currentPosition != null) {
-      _polylines[const PolylineId('truck_to_user')] = Polyline(
-        polylineId: const PolylineId('truck_to_user'),
+      _polylines[const PolylineId('to_user')] = Polyline(
+        polylineId: const PolylineId('to_user'),
         points: [_truckPosition!, _currentPosition!],
-        color: Colors.green,
-        width: 5,
+        color: Colors.blue,
       );
     }
 
     if (_truckPosition != null) {
-      _polylines[const PolylineId('truck_to_destination')] = Polyline(
-        polylineId: const PolylineId('truck_to_destination'),
+      _polylines[const PolylineId('to_destination')] = Polyline(
+        polylineId: const PolylineId('to_destination'),
         points: [_truckPosition!, _destinationLocation],
-        color: Colors.red,
-        width: 5,
+        color: Colors.green,
       );
     }
   }
@@ -230,102 +228,78 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Truck Tracker"),
-        centerTitle: true,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: AppBar(title: const Text('Truck Tracker')),
+      body: Stack(
         children: [
-          // Google Map
-          Expanded(
-            flex: 2,
-            child: _currentPosition == null
-                ? const Center(child: CircularProgressIndicator())
-                : GoogleMap(
-              initialCameraPosition: CameraPosition(target: _sourceLocation, zoom: 15),
-              markers: {
-                Marker(
-                  markerId: const MarkerId("truck"),
-                  position: _truckPosition!,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-                  infoWindow: const InfoWindow(title: "Truck Location"),
-                ),
-                Marker(
-                  markerId: const MarkerId("user"),
-                  position: _currentPosition!,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-                  infoWindow: const InfoWindow(title: "Your Location"),
-                ),
-                Marker(
-                  markerId: const MarkerId("destination"),
-                  position: _destinationLocation,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-                  infoWindow: const InfoWindow(title: "Destination"),
-                ),
-              },
-              polylines: Set<Polyline>.of(_polylines.values),
+          _truckPosition != null
+              ? GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: _truckPosition!,
+              zoom: 14,
             ),
-          ),
-          const SizedBox(height: 10),
-          // Arrival Times and Distances
-          Card(
-            elevation: 5,
-            margin: const EdgeInsets.all(10),
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Distance to User: ${_distanceToUser?.toStringAsFixed(2) ?? "--"} km",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  Text(
-                    "Arrival Time to User: ${_arrivalTimeToUser ?? "--"}",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Distance to Destination: ${_distanceToDestination?.toStringAsFixed(2) ?? "--"} km",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  Text(
-                    "Arrival Time to Destination: ${_arrivalTimeToDestination ?? "--"}",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
+            markers: {
+              Marker(
+                markerId: const MarkerId('user'),
+                position: _currentPosition ?? _sourceLocation,
+                infoWindow: const InfoWindow(title: 'User Location'),
               ),
-            ),
-          ),
-
-          // Driver Information
-          Card(
-            elevation: 5,
-            margin: const EdgeInsets.all(10),
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const CircleAvatar(
-                    backgroundImage: AssetImage("assets/images/driver.png"), // Add your driver's picture here
-                    radius: 30,
-                  ),
-                  const SizedBox(width: 15),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text("Driver: Tero Bauw Vann", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 5),
-                      Text("Truck Plate: ABC-1234", style: TextStyle(fontSize: 16)),
-                      SizedBox(height: 5),
-                      Text("Phone Number: 123-456-789", style: TextStyle(fontSize: 16)),
-                      SizedBox(height: 5),
-                      Text("Truck Model: Thulo Truck", style: TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                ],
+              Marker(
+                markerId: const MarkerId('truck'),
+                position: _truckPosition!,
+                infoWindow: const InfoWindow(title: 'Truck Location'),
+              ),
+              Marker(
+                markerId: const MarkerId('destination'),
+                position: _destinationLocation,
+                infoWindow: const InfoWindow(title: 'Destination Location'),
+              ),
+            },
+            polylines: Set<Polyline>.of(_polylines.values),
+            myLocationEnabled: true,
+          )
+              : const Center(child: CircularProgressIndicator()),
+          Positioned(
+            bottom: 20,
+            left: 10,
+            right: 10,
+            child: Card(
+              color: Colors.white,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Driver Information",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Text("Name: $driverName"),
+                    Text("Contact: $driverContact"),
+                    Text("Vehicle: $vehicleNumber"),
+                    SizedBox(height: 12),
+                    Text(
+                      "Arrival Information",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Text("Distance to User: ${_distanceToUser?.toStringAsFixed(
+                        2)} km"),
+                    Text("Estimated Arrival to User: $_arrivalTimeToUser"),
+                    Text(
+                        "Distance to Destination: ${_distanceToDestination
+                            ?.toStringAsFixed(2)} km"),
+                    Text(
+                        "Estimated Arrival to Destination: $_arrivalTimeToDestination"),
+                  ],
+                ),
               ),
             ),
           ),

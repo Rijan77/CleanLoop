@@ -33,6 +33,7 @@ dependencies:
   location: ^7.0.1
   geocoding: ^3.0.0
   flutter_local_notifications: ^18.0.1
+  fl_chart:
   flutter:
     sdk: flutter
 
@@ -43,6 +44,8 @@ dependencies:
   firebase_core:
   firebase_auth:
   google_sign_in:
+  cloud_firestore:
+
 
 
 dev_dependencies:
