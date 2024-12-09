@@ -1,20 +1,16 @@
-// event.dart
 class Event {
-  String title;
-  DateTime date;
-  String time;
-  String location;
-  List<String> participants = []; // List to store participants
+  final String id; // Unique ID for each event
+  final String title;
+  final DateTime date;
+  final String time;
+  final String location;
 
   Event({
+    required this.id,
     required this.title,
     required this.date,
     required this.time,
     required this.location,
   });
-
-  // Method to add a participant
-  void addParticipant(String participant) {
-    participants.add(participant);
-  }
 }
+
