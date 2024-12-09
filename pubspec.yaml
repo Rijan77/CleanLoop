@@ -33,6 +33,7 @@ dependencies:
   location: ^7.0.1
   geocoding: ^3.0.0
   flutter_local_notifications: ^18.0.1
+  intl:
   fl_chart:
   flutter:
     sdk: flutter

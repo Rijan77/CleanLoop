@@ -31,7 +31,7 @@ class _MapPageState extends State<MapPage> {
   late FlutterLocalNotificationsPlugin _localNotifications;
 
   // Placeholder driver and arrival info
-  final String driverName = "Don Van Malai";
+  final String driverName = "Jivan Rai";
   final String driverContact = "+9808888475";
   final String vehicleNumber = "ABC-1977";
   double? _distanceToUser;
@@ -60,6 +60,7 @@ class _MapPageState extends State<MapPage> {
       await Firebase.initializeApp();
       _firestore = FirebaseFirestore.instance;
       await saveTruckStage('Source', _sourceLocation);
+      await saveDriverInfoToFirebase(driverName, driverContact, vehicleNumber, _sourceLocation);
     } catch (e) {
       debugPrint('Error initializing Firebase: $e');
     }
@@ -73,6 +74,18 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> sendNotification(String title, String body) async {
+    // Save notification in Firestore
+    try {
+      await _firestore.collection('notifications').add({
+        'title': title,
+        'body': body,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error saving notification: $e');
+    }
+
+    // Show local notification
     const androidDetails = AndroidNotificationDetails(
       'truck_channel', 'Truck Notifications',
       channelDescription: 'Notifications for truck tracking',
@@ -81,6 +94,23 @@ class _MapPageState extends State<MapPage> {
     );
     const notificationDetails = NotificationDetails(android: androidDetails);
     await _localNotifications.show(0, title, body, notificationDetails);
+  }
+
+  Future<void> saveDriverInfoToFirebase(String driverName, String contact, String vehicleNumber, LatLng location) async {
+    try {
+      await _firestore.collection('drivers').doc('driverInfo').set({
+        'driver_name': driverName,
+        'contact': contact,
+        'vehicle_number': vehicleNumber,
+        'location': {
+          'latitude': location.latitude,
+          'longitude': location.longitude,
+        },
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error saving driver info: $e');
+    }
   }
 
   Future<void> saveTruckStage(String stage, LatLng location) async {
@@ -155,6 +185,11 @@ class _MapPageState extends State<MapPage> {
             saveTruckStage('Destination', _destinationLocation);
             timer.cancel();
           }
+        }
+
+        // Save the driver's current location and information to Firebase
+        if (_truckPosition != null) {
+          saveDriverInfoToFirebase(driverName, driverContact, vehicleNumber, _truckPosition!);
         }
 
         updateArrivalTimes();

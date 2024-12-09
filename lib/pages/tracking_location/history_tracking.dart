@@ -49,6 +49,26 @@ class _HistoryTrackingPageState extends State<HistoryTrackingPage> {
     return "Unknown Location";
   }
 
+  // Fetch the driver details from the 'drivers' collection (driver_name)
+  Future<String> _getDriverName() async {
+    try {
+      final driverSnapshot = await _firestore
+          .collection('drivers')
+          .doc('driverInfo')  // Document ID is 'driverInfo' where driver details are stored
+          .get();
+
+      if (driverSnapshot.exists) {
+        final driverData = driverSnapshot.data()!;
+        return driverData['driver_name'] ?? 'Unknown Driver'; // Return the driver's name
+      } else {
+        return 'Unknown Driver'; // If no driver info found, return Unknown Driver
+      }
+    } catch (e) {
+      debugPrint("Error fetching driver info: $e");
+      return 'Unknown Driver'; // Handle errors
+    }
+  }
+
   Widget _buildPieChart() {
     final pieData = stageCounts.entries
         .map((entry) => PieChartSectionData(
@@ -103,19 +123,25 @@ class _HistoryTrackingPageState extends State<HistoryTrackingPage> {
                     final longitude = location['longitude'];
                     final timestamp = data['timestamp']?.toDate().toString() ?? 'Unknown';
 
-                    return FutureBuilder<String>(
-                      future: latitude != null && longitude != null
-                          ? _getLocationName(latitude, longitude)
-                          : Future.value("Unknown Location"),
+                    return FutureBuilder<List<String>>(
+                      future: Future.wait([
+                        _getLocationName(latitude, longitude),
+                        _getDriverName(),  // Fetch the driver name as well
+                      ]),
                       builder: (context, locationSnapshot) {
-                        final locationName =
-                        locationSnapshot.connectionState == ConnectionState.done &&
-                            locationSnapshot.hasData
-                            ? locationSnapshot.data!
-                            : "Loading location...";
+                        if (locationSnapshot.connectionState == ConnectionState.waiting) {
+                          return const ListTile(
+                            title: Text('Loading...'),
+                            subtitle: Text('Location and driver info loading...'),
+                          );
+                        }
+
+                        final locationName = locationSnapshot.data?[0] ?? "Unknown Location";
+                        final driverName = locationSnapshot.data?[1] ?? "Unknown Driver";
+
                         return ListTile(
                           title: Text(stage),
-                          subtitle: Text('Location: $locationName\nTime: $timestamp'),
+                          subtitle: Text('Location: $locationName\nDriver: $driverName\nTime: $timestamp'),
                         );
                       },
                     );
